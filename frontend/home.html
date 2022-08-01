@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardano Dapp Authentication</title>
+</head>
+<body>
+  <h3>Step 1: Connect your wallet <span id="walletStatus"></span></h3>
+  <button onClick="connectToWallet('eternl')">Eternl</button>
+  <button onClick="connectToWallet('nami')">Nami</button>
+
+  <h3>Step 2: Sign the payload</h3>
+  <h5>Payload: <span id="payload"></span><br>Signature: <span id="signature"></span></h5>
+  <button onClick="signData()">Sign</button>
+  
+  <h3>Step 3: Send the signature to the server for verification</h3>
+  <h5>Status: <span id="verificationStatus"></span></h5>
+  <button onClick="verifyData()">Verify</button>
+</body>
+
+<script>
+  var API = null
+  var walletAddress = null
+  var payload = ""
+  var signature = null
+  
+  fetchPayload = async () => {
+    let payloadTag = document.getElementById("payload")
+
+    fetch('/payload', {
+      method: "GET",
+    }).then(response => response.json()).then((data) => {
+      payload = data.payload
+      payloadTag.innerText = payload
+    }).catch(e => console.error(e))
+  }
+  
+  connectToWallet = async (walletName="eternl") => {
+    let walletTag = document.getElementById("walletStatus")
+    walletTag.innerText = "(connecting...)"
+
+    try {
+      API = await window.cardano[walletName].enable()
+      console.log("API response", API)
+
+      let rawAddress = await API.getRewardAddresses();
+      walletAddress = rawAddress[0]
+      walletTag.innerText = "(connected)"
+    } catch (e) {
+      walletTag.innerText = "(Error: " + e.message + ")"
+    }
+  }
+
+  signData = async () => {
+    let signatureTag = document.getElementById("signature")
+    signature = await API.signData(walletAddress, payload)
+    signatureTag.innerText = signature.signature.substring(0, 100) + "..."
+    console.log("signature", signature)
+  }
+
+  verifyData = async () => {
+    let verificationTag = document.getElementById("verificationStatus")
+    verificationTag.innerText = "verifying..."
+    let _data = {
+      signature,
+      payload,
+      address: walletAddress
+    }
+    
+    fetch('/verify', {
+      method: "POST",
+      body: JSON.stringify(_data),
+      headers: {"Content-type": "application/json; charset=UTF-8"}
+    }).then(response => response.json())
+    .then((responseBody) => {
+      console.log(responseBody)
+      if (responseBody.result) {
+        verificationTag.innerText = "successfully authenticated"
+      } else {
+        verificationTag.innerText = "failed to authenticate"
+      }
+    }).catch(e => console.error(e))
+  }
+
+  //fetch the payload to sign from the server once the page has loaded
+  fetchPayload()
+
+</script>
+</html>

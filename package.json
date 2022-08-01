@@ -1,0 +1,25 @@
+{
+  "name": "cardano-dapp-auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacob8765/cardano-dapp-auth.git"
+  },
+  "author": "Jacob Schuster",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jacob8765/cardano-dapp-auth/issues"
+  },
+  "homepage": "https://github.com/jacob8765/cardano-dapp-auth#readme",
+  "dependencies": {
+    "@emurgo/cardano-message-signing-nodejs": "^1.0.1",
+    "@emurgo/cardano-serialization-lib-nodejs": "^11.0.0",
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1"
+  }
+}
